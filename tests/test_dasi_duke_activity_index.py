@@ -3,8 +3,13 @@ Automated Pytest Test Suite for Dasi Duke Activity Index.
 Domain: Clinical & Biomedical AI
 Standard: CAP / CLSI / ISO Standards
 """
+import os
 import sys
 from pathlib import Path
+
+# Set secure test key before importing modules that initialize audit trail
+os.environ.setdefault("AUDIT_SECRET_KEY", "test-secret-key-for-pytest-only-do-not-use-in-production")
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pytest

@@ -1,10 +1,12 @@
 # Duke Activity Status Index (DASI)
 
+### [Open the Live Application →](https://abusuraihsakhri.github.io/dasi-duke-activity-index/)
+
 A 12-question functional-capacity calculator implementing the published Duke Activity Status Index weights. It reports a **DASI score (0–58.2)**, regression-estimated peak oxygen uptake, and estimated metabolic equivalents (METs). The source code implements the calculation; it does not perform an exercise test or calculate surgical cardiac risk.
 
 ## Browser questionnaire
 
-The self-contained application is in [`web/index.html`](web/index.html). It requires an explicit Yes/No answer to all 12 activities, calculates locally without external JavaScript packages or servers, and can export a CSV of answers and results. No browser data is intentionally uploaded, stored, or sent to any endpoint. The application is suitable for static hosting, including GitHub Pages once enabled for the repository.
+The self-contained application is in [`web/index.html`](web/index.html). It requires an explicit Yes/No answer to all 12 activities, calculates locally without external JavaScript packages or servers, and can export a CSV of answers and results. No browser data is intentionally uploaded, stored, or sent to any endpoint. The same static application is deployed through GitHub Pages.
 
 **Clinical limitation:** The 2024 AHA/ACC perioperative guideline uses **DASI ≤34** as a screening criterion for poor/uncertain functional capacity. Estimated VO₂ and METs are regression-derived, not measured values. Do not use this tool alone for perioperative clearance, stress-test decisions, diagnosis, or patient management.
 

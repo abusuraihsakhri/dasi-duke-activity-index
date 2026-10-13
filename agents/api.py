@@ -2,6 +2,9 @@
 FastAPI REST API Server for Dasi Duke Activity Index.
 """
 from typing import Dict, Any, List
+from pathlib import Path
+from fastapi.responses import FileResponse
+from dasi_index import DASI_ITEMS, calculate_metrics
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from .base import AuditLogger, PHIGuard
@@ -53,3 +56,24 @@ def api_chat(req: ChatRequest):
 @app.get("/api/audit/logs")
 def api_audit_logs():
     return {"audit_trail": AuditLogger.get_trail(), "verified": AuditLogger.verify_integrity()}
+
+
+class DasiRequest(BaseModel):
+    responses: Dict[str, int]
+
+
+@app.get("/", include_in_schema=False)
+def index():
+    """Serve the same standalone questionnaire used on GitHub Pages."""
+    return FileResponse(Path(__file__).resolve().parent.parent / "web" / "index.html")
+
+
+@app.post("/api/dasi")
+def api_dasi(request: DasiRequest):
+    """Evaluate a complete, explicit twelve-item DASI questionnaire."""
+    if set(request.responses) != set(DASI_ITEMS):
+        raise HTTPException(status_code=422, detail="Exactly v1-v12 are required")
+    try:
+        return calculate_metrics(**request.responses)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc

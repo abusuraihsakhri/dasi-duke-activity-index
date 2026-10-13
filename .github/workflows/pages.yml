@@ -48,3 +48,37 @@ jobs:
           done
           echo "Published page did not return the expected questionnaire" >&2
           exit 1
+
+      - name: Browser end-to-end calculation and export check
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          npm install --no-save --no-package-lock playwright@1.64.0
+          npx playwright install --with-deps chromium
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { chromium } from 'playwright';
+          const browser = await chromium.launch({headless: true});
+          const page = await browser.newPage({viewport:{width:390,height:844},acceptDownloads:true});
+          const errors = [];
+          page.on('pageerror',err => errors.push(err.message));
+          await page.goto(process.env.PAGE_URL,{waitUntil:'domcontentloaded'});
+          assert.equal(await page.locator('input[type=radio]').count(),24);
+          await page.getByRole('button',{name:'Calculate DASI'}).click();
+          assert.match(await page.locator('#error').innerText(),/all 12/);
+          for(let i=1;i<=12;i++){
+            await page.locator('input[name="v'+i+'"][value="1"]').check();
+          }
+          await page.getByRole('button',{name:'Calculate DASI'}).click();
+          assert.equal(await page.locator('#score').innerText(),'58.20');
+          assert.equal(await page.locator('#vo2').innerText(),'34.63');
+          assert.equal(await page.locator('#mets').innerText(),'9.89');
+          const downloaded = page.waitForEvent('download');
+          await page.locator('#download').click();
+          assert.equal((await downloaded).suggestedFilename(),'dasi-results.csv');
+          await page.getByRole('button',{name:'Clear answers'}).click();
+          assert.equal(await page.locator('#results').isVisible(),false);
+          assert.equal(errors.length,0,errors.join('; '));
+          await browser.close();
+          console.log('Live questionnaire calculation, CSV export, reset and mobile smoke: PASS');
+          JS

@@ -40,3 +40,9 @@ jobs:
         assert AuditLogger.verify_integrity() is True
         print('Security & Zero-PHI Audit Passed!')
         "
+
+    - name: Docker image build and DASI CLI smoke test
+      if: matrix.python-version == '3.12'
+      run: |
+        docker build -t dasi-duke-activity-index:test .
+        docker run --rm dasi-duke-activity-index:test python dasi_index.py single --dasi-score 58.2

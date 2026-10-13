@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Dasi Duke Activity Index API",
-    "description": "Enterprise Distributed Component Platform (Clinical & Cryptographic AI) adhering to CAP / CLSI / NIST Standards.",
-    "version": "3.0.0-ENTERPRISE",
+    "description": "DASI scoring API with optional authenticated legacy audit demonstration.",
+    "version": "1.0.0",
     "contact": {
       "name": "Dr. Abu Suraih Sakhri",
       "url": "https://github.com/abusuraihsakhri"
@@ -25,7 +25,7 @@
         "summary": "Prometheus operational metrics",
         "responses": {
           "200": {
-            "description": "Prometheus text metrics"
+            "description": "JSON operational summary; not Prometheus exposition format"
           }
         }
       }
@@ -71,12 +71,23 @@
           "200": {
             "description": "Consensus dossier with HMAC signature"
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "X-Audit-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Must match configured AUDIT_API_KEY; routes disabled if no key configured."
+          }
+        ]
       }
     },
     "/api/chat": {
       "post": {
-        "summary": "Air-gapped supervisory conversational assistant",
+        "summary": "Deterministic mock response (no inference)",
         "requestBody": {
           "content": {
             "application/json": {
@@ -98,7 +109,18 @@
           "200": {
             "description": "Supervisory response"
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "X-Audit-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Must match configured AUDIT_API_KEY; routes disabled if no key configured."
+          }
+        ]
       }
     },
     "/api/audit/logs": {
@@ -107,6 +129,57 @@
         "responses": {
           "200": {
             "description": "Cryptographic audit trail"
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-Audit-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Must match configured AUDIT_API_KEY; routes disabled if no key configured."
+          }
+        ]
+      }
+    },
+    "/api/dasi": {
+      "post": {
+        "summary": "Calculate a complete DASI questionnaire",
+        "description": "Requires all twelve binary item responses. No audit logging.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "responses"
+                ],
+                "properties": {
+                  "responses": {
+                    "type": "object",
+                    "description": "Keys v1 through v12, each 0 or 1",
+                    "additionalProperties": {
+                      "type": "integer",
+                      "enum": [
+                        0,
+                        1
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "DASI score and regression-derived VO2/MET estimates"
+          },
+          "422": {
+            "description": "Invalid or incomplete questionnaire"
           }
         }
       }

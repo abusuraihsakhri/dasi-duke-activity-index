@@ -68,3 +68,12 @@ def test_supervisor_consensus_and_audit():
     assert main(["audit", "--task-id", "CLI-TEST-01"]) == 0
     assert main(["chat", "Explain", "specifications"]) == 0
     assert main(["verify-audit"]) == 0
+
+
+def test_audit_signature_recomputed():
+    from agents.base import AuditTrail
+    a = AuditTrail(secret_key='testing-key')
+    a.log('actor', 'role', 'event', {'ok': True})
+    assert a.verify_integrity()
+    a.logs[0]['actor'] = 'modified'
+    assert not a.verify_integrity()

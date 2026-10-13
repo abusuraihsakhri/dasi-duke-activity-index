@@ -49,10 +49,18 @@ def calculate_dasi_score(responses: Dict[str, float]) -> float:
     Returns:
         DASI score (0 to MAX_DASI_SCORE).
     """
+    if set(responses) - set(DASI_ITEMS):
+        raise ValueError("Unknown DASI item")
     score = 0.0
     for key, config in DASI_ITEMS.items():
         val = responses.get(key, 0)
-        if val and float(val) > 0:
+        try:
+            numeric = float(val)
+        except (ValueError, TypeError, OverflowError) as exc:
+            raise ValueError(f"{key} must be 0 or 1") from exc
+        if not math.isfinite(numeric) or numeric not in (0.0, 1.0):
+            raise ValueError(f"{key} must be 0 or 1")
+        if numeric == 1:
             score += config["weight"]
     return round(score, 2)
 
@@ -86,36 +94,20 @@ def calculate_mets(peak_vo2: float) -> float:
 
 
 def classify_functional_capacity(dasi_score: float, mets: float) -> Dict[str, str]:
+    """DASI perioperative screening interpretation, not a surgical risk estimate.
+
+    The 2024 AHA/ACC guideline uses DASI <=34 for poor/uncertain functional
+    capacity. Regression-derived METs are not measured exercise capacity.
     """
-    Classify functional capacity based on DASI score and METs.
-
-    Thresholds based on ACC/AHA guidelines:
-    - Poor: < 4 METs (DASI < ~10.2)
-    - Moderate: 4-7 METs (DASI ~10.2-34.7)
-    - Good: > 7 METs (DASI > ~34.7)
-
-    Args:
-        dasi_score: DASI total score.
-        mets: Estimated METs.
-
-    Returns:
-        Dict with classification and clinical recommendation.
-    """
-    if mets < 4.0:
+    if dasi_score <= 34:
         return {
-            "classification": "Poor Functional Capacity",
-            "clinical_recommendation": "Consider preoperative cardiac testing; high surgical risk"
+            "classification": "DASI <=34: limited or uncertain functional capacity",
+            "clinical_recommendation": "Consider overall symptoms, cardiac risk, and surgical risk; DASI alone does not determine testing."
         }
-    elif mets < 7.0:
-        return {
-            "classification": "Moderate Functional Capacity",
-            "clinical_recommendation": "Moderate surgical risk; clinical judgment for further testing"
-        }
-    else:
-        return {
-            "classification": "Good Functional Capacity",
-            "clinical_recommendation": "Low surgical risk; proceed without additional cardiac testing"
-        }
+    return {
+        "classification": "DASI >34: higher self-reported functional capacity",
+        "clinical_recommendation": "Interpret alongside other clinical factors; DASI alone does not establish surgical clearance."
+    }
 
 
 def calculate_metrics(**kwargs) -> Dict[str, Any]:
@@ -129,25 +121,20 @@ def calculate_metrics(**kwargs) -> Dict[str, Any]:
     Returns:
         Dict with score, peak_vo2, mets, classification, and clinical_recommendation.
     """
-    # If dasi_score is provided directly, use it
-    if "dasi_score" in kwargs and kwargs["dasi_score"] is not None:
+    # A supplied score and questionnaire answers must not be mixed.
+    supplied = {key: kwargs[key] for key in DASI_ITEMS if kwargs.get(key) is not None}
+    if kwargs.get("dasi_score") is not None:
+        if supplied:
+            raise ValueError("Provide either dasi_score or item responses, not both")
         try:
             dasi_score = float(kwargs["dasi_score"])
-        except (ValueError, TypeError):
-            dasi_score = 0.0
+        except (ValueError, TypeError, OverflowError) as exc:
+            raise ValueError("dasi_score must be between 0 and 58.2") from exc
+        if not math.isfinite(dasi_score) or not (0 <= dasi_score <= MAX_DASI_SCORE):
+            raise ValueError("dasi_score must be between 0 and 58.2")
+        dasi_score = round(dasi_score, 2)
     else:
-        # Build responses dict from individual items
-        responses = {}
-        for key in DASI_ITEMS:
-            if key in kwargs:
-                try:
-                    responses[key] = float(kwargs[key])
-                except (ValueError, TypeError):
-                    responses[key] = 0.0
-        dasi_score = calculate_dasi_score(responses)
-
-    # Clamp score to valid range
-    dasi_score = max(0.0, min(dasi_score, MAX_DASI_SCORE))
+        dasi_score = calculate_dasi_score(supplied)
 
     peak_vo2 = estimate_peak_vo2(dasi_score)
     mets = calculate_mets(peak_vo2)
@@ -161,7 +148,7 @@ def calculate_metrics(**kwargs) -> Dict[str, Any]:
         "classification": classification["classification"],
         "clinical_recommendation": classification["clinical_recommendation"],
         "max_possible_score": MAX_DASI_SCORE,
-        "inputs_evaluated": len([k for k in kwargs if k.startswith("v") and k in DASI_ITEMS]),
+        "inputs_evaluated": len(supplied),
     }
 
 
@@ -189,7 +176,7 @@ def process_batch(input_csv: str, output_csv: str) -> None:
     if not fieldnames:
         raise ValueError(f"Input CSV file is empty or has no headers: {input_csv}")
 
-    out_fields = fieldnames + ["dasi_score", "peak_vo2_ml_kg_min", "mets", "classification", "clinical_recommendation"]
+    out_fields = list(dict.fromkeys(fieldnames + ["dasi_score", "peak_vo2_ml_kg_min", "mets", "classification", "clinical_recommendation"]))
     out_rows = []
 
     for r in rows:

@@ -1,236 +1,158 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dasi Duke Activity Index — Operations Console</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #090d16;
-            --card: #111827;
-            --border: #1f293d;
-            --accent: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.25);
-            --text: #f3f4f6;
-            --text-muted: #9ca3af;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --success: #10b981;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding: 2rem;
-            min-height: 100vh;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .header-title h1 { font-size: 1.6rem; font-weight: 700; color: #fff; }
-        .header-title p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem; }
-        .badge {
-            display: inline-block;
-            padding: 0.3rem 0.8rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            background: var(--accent-glow);
-            color: var(--accent);
-            border: 1px solid var(--accent);
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 1.5rem;
-        }
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-        .card h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; }
-        input, select, textarea {
-            width: 100%;
-            padding: 0.65rem 0.9rem;
-            background: #0d1322;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: #fff;
-            font-family: inherit;
-            font-size: 0.9rem;
-        }
-        input:focus, textarea:focus { outline: none; border-color: var(--accent); }
-        .btn {
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            padding: 0.7rem 1.4rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            width: 100%;
-        }
-        .btn:hover { background: #2563eb; }
-        .terminal {
-            background: #060911;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            color: #10b981;
-            height: 380px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-        }
-        .metrics-bar {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .metric-box {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
-        }
-        .metric-val { font-size: 1.4rem; font-weight: 700; color: #fff; margin-top: 0.25rem; }
-        .metric-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Local, browser-based 12-item Duke Activity Status Index questionnaire and functional capacity estimates.">
+<title>Duke Activity Status Index (DASI) Calculator</title>
+<style>
+:root{color-scheme:light;--ink:#192d42;--muted:#546779;--line:#d8e2ec;--bg:#f4f7fb;--blue:#155a9e;--soft:#e9f3ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);line-height:1.55}
+main{max-width:1080px;margin:0 auto;padding:30px 20px 55px}
+header{max-width:830px;margin-bottom:25px}h1{font-size:clamp(1.7rem,3vw,2.5rem);line-height:1.2;letter-spacing:-.035em;margin:.3rem 0 .65rem}
+.eyebrow{font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;font-weight:700;color:var(--blue)}
+.lead{color:var(--muted);font-size:1rem;margin:.5rem 0}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 4px 18px #18334b0b;padding:22px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+h2{font-size:1.12rem;margin:0}.progress{color:var(--muted);font-size:.88rem;font-variant-numeric:tabular-nums}
+.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;list-style:none;margin:0;padding:0}
+.question{border:1px solid var(--line);border-radius:11px;padding:15px;background:#fff;min-width:0}
+.question:focus-within{border-color:#629cd3;box-shadow:0 0 0 2px #c5e3ff}
+fieldset{border:0;min-width:0;margin:0;padding:0}
+legend{font-size:.94rem;font-weight:600;padding:0;width:100%;margin-bottom:11px}
+.number{color:var(--muted);font-size:.77rem;display:block;margin-bottom:4px}
+.options{display:flex;gap:9px;flex-wrap:wrap}
+.options label{display:flex;align-items:center;gap:7px;border:1px solid var(--line);padding:6px 13px;border-radius:8px;cursor:pointer}
+.options label:has(input:checked){background:var(--soft);border-color:var(--blue);color:var(--blue)}
+input[type=radio]{accent-color:var(--blue);width:16px;height:16px;margin:0}
+input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #e5a327;outline-offset:3px}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:11px;margin-top:18px}
+button{border:0;border-radius:9px;font:600 .94rem inherit;padding:11px 18px;cursor:pointer}
+.primary{background:var(--blue);color:#fff}.primary:hover{background:#104779}
+.secondary{border:1px solid var(--line);background:#fff;color:var(--ink)}.secondary:hover{background:#f0f5fb}
+.error{color:#a72826;font-weight:600;margin:8px 0 0}
+.results{margin-top:20px}.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin:14px 0}
+.stat{background:var(--soft);border-radius:10px;padding:13px}.stat strong{font-size:1.8rem;display:block;font-variant-numeric:tabular-nums}
+.stat span{font-size:.79rem;color:var(--muted)}
+.interpretation{border-left:4px solid var(--blue);padding:8px 0 8px 15px}
+.notes{font-size:.88rem;color:var(--muted);margin-top:20px}
+.notes a{color:var(--blue)}[hidden]{display:none!important}
+@media(max-width:680px){main{padding:20px 12px 35px}.panel{padding:15px}.choices{grid-template-columns:1fr}.stat-grid{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:1/-1}}
+@media(prefers-reduced-motion:no-preference){.question,.primary,.secondary{transition:background .12s,border-color .12s}}
+</style>
 </head>
 <body>
-
-    <div class="header">
-        <div class="header-title">
-            <h1>Dasi Duke Activity Index</h1>
-            <p>Domain: Clinical & Cryptographic AI | Standard: CAP / CLSI / NIST Standards | LabMind-Atlas Architecture</p>
-        </div>
-        <div>
-            <span class="badge">Air-Gapped Active</span>
-            <span class="badge" style="background: rgba(16,185,129,0.2); color: #10b981; border-color: #10b981;">Zero-PHI Guard Active</span>
-        </div>
-    </div>
-
-    <div class="metrics-bar">
-        <div class="metric-box">
-            <div class="metric-label">System Status</div>
-            <div class="metric-val" style="color: var(--success);" id="m-status">OPTIMAL</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Tasks Processed</div>
-            <div class="metric-val" id="m-tasks">142</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Audit Blocks Signed</div>
-            <div class="metric-val" id="m-audit">142</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">PHI Interceptions</div>
-            <div class="metric-val" style="color: var(--accent);" id="m-phi">0</div>
-        </div>
-    </div>
-
-    <div class="grid">
-        <div class="card">
-            <h2>⚙️ Dispatch Distributed Component Audit</h2>
-            <div class="form-group">
-                <label>Task / Sample ID</label>
-                <input type="text" id="task_id" value="TASK-2026-LIVE-01">
-            </div>
-            <div class="form-group">
-                <label>Target Identifier</label>
-                <input type="text" id="target_id" value="SPECIMEN-ALPHA-77">
-            </div>
-            <div class="form-group">
-                <label>Primary Measurement / Value</label>
-                <input type="number" id="primary_metric" value="29.4" step="0.1">
-            </div>
-            <div class="form-group">
-                <label>Secondary Metric / Kinetic Index</label>
-                <input type="number" id="secondary_metric" value="14.8" step="0.1">
-            </div>
-            <div class="form-group">
-                <label>Status / Phenotype Descriptor</label>
-                <input type="text" id="status_descriptor" value="DISCORDANT_ANOMALY">
-            </div>
-            <div class="form-group">
-                <label><input type="checkbox" id="is_critical" checked> Trigger Emergency / Critical Flag</label>
-            </div>
-            <button class="btn" onclick="runAudit()">Execute Distributed Component Audit</button>
-        </div>
-
-        <div class="card">
-            <h2>📊 Real-Time Consensus Dossier & Audit Log</h2>
-            <div class="terminal" id="outputConsole">// Dasi Duke Activity Index Operations Console Ready
-// Connection established with Air-Gapped Supervisor
-// Cryptographic HMAC-SHA256 audit ledger loaded.
-// Ready for live task payload dispatch...</div>
-        </div>
-    </div>
-
-    <script>
-        async function runAudit() {
-            const consoleEl = document.getElementById('outputConsole');
-            consoleEl.innerText = "// Dispatching task across specialized workers...
-// Invoking InvariantQCWorker, SafetyEscalationWorker, ProtocolWorker...";
-
-            const payload = {
-                task_id: document.getElementById('task_id').value,
-                target_identifier: document.getElementById('target_id').value,
-                primary_metric: parseFloat(document.getElementById('primary_metric').value),
-                secondary_metric: parseFloat(document.getElementById('secondary_metric').value),
-                status_descriptor: document.getElementById('status_descriptor').value,
-                is_critical_flag: document.getElementById('is_critical').checked
-            };
-
-            try {
-                const res = await fetch('/api/audit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                consoleEl.innerText = JSON.stringify(data, null, 2);
-                document.getElementById('m-tasks').innerText = parseInt(document.getElementById('m-tasks').innerText) + 1;
-                document.getElementById('m-audit').innerText = parseInt(document.getElementById('m-audit').innerText) + 1;
-            } catch (err) {
-                consoleEl.innerText = "// Offline / Simulation Output:\n" + JSON.stringify({
-                    dossier_id: "DOSSIER-SIM-" + Math.floor(Math.random()*10000),
-                    system: "dasi-duke-activity-index",
-                    domain: "Clinical & Cryptographic AI",
-                    task_id: payload.task_id,
-                    overall_urgency: payload.is_critical_flag ? "CRITICAL_STAT_PANIC" : "ELEVATED_RISK",
-                    integrity_status: "DISCORDANT_ANOMALY",
-                    alerts: [
-                        { worker: "InvariantQCWorker", alert: "Primary metric exceeds upper reference bound" },
-                        { worker: "SafetyEscalationWorker", alert: "Critical emergency interlock flag active" }
-                    ],
-                    audit_hash: "HMAC_SHA256_e83f9a72b941d6c381f9"
-                }, null, 2);
-            }
-        }
-    </script>
+<main>
+<header>
+<div class="eyebrow">Functional capacity assessment</div>
+<h1>Duke Activity Status Index</h1>
+<p class="lead">Answer all 12 questions about activities you can perform. Get the original DASI score and regression-estimated peak oxygen uptake and METs.</p>
+<p class="lead">Educational and clinical documentation aid. Not a diagnosis, exercise test, perioperative risk calculator, or authorization to proceed with surgery.</p>
+</header>
+<section class="panel" aria-labelledby="q-heading">
+<div class="top"><h2 id="q-heading">Activity questionnaire</h2><span id="progress" class="progress" aria-live="polite">0 of 12 answered</span></div>
+<form id="dasi-form" novalidate>
+<ol class="choices" id="questions"></ol>
+<p id="error" class="error" role="alert" hidden></p>
+<div class="actions"><button class="primary" type="submit">Calculate DASI</button><button class="secondary" type="reset">Clear answers</button></div>
+</form>
+</section>
+<section id="results" class="panel results" aria-labelledby="results-heading" hidden>
+<div class="top"><h2 id="results-heading">Your results</h2><button type="button" class="secondary" id="download">Export CSV</button></div>
+<div class="stat-grid">
+<div class="stat"><span>DASI score / 58.2</span><strong id="score">—</strong></div>
+<div class="stat"><span>Estimated peak VO₂ (mL/kg/min)</span><strong id="vo2">—</strong></div>
+<div class="stat"><span>Estimated METs</span><strong id="mets">—</strong></div>
+</div>
+<p id="interpretation" class="interpretation"></p>
+<p class="notes">VO₂ estimate = 0.43 × DASI + 9.6; estimated METs = VO₂ ÷ 3.5. Estimates are questionnaire-derived and not cardiopulmonary exercise-test measurements. The 2024 AHA/ACC perioperative guideline uses DASI ≤34 as a screening threshold for limited or uncertain functional capacity; testing decisions require clinical context.</p>
+</section>
+<footer class="notes">
+<p><strong>Privacy:</strong> Calculations run entirely in this browser tab. Answers are not transmitted to a server or stored by this application. CSV export saves results to your device.</p>
+<p><strong>Sources:</strong> Hlatky MA et al. <em>Am J Cardiol.</em> 1989;64:651–654.
+<a href="https://doi.org/10.1161/CIR.0000000000001285" target="_blank" rel="noopener noreferrer">2024 AHA/ACC perioperative guideline</a>. Only self-reported ability is assessed.</p>
+</footer>
+</main>
+<script>
+"use strict";
+const activities = [
+  ["Take care of yourself (eating, dressing, bathing, using the toilet)",2.75],
+  ["Walk indoors around your house",1.75],
+  ["Walk one or two blocks on level ground",2.75],
+  ["Climb one flight of stairs or walk up a hill",5.50],
+  ["Run a short distance",8.00],
+  ["Do light housework (dusting or washing dishes)",2.70],
+  ["Do moderate housework (vacuuming, sweeping, carrying groceries)",3.50],
+  ["Do heavy housework (scrubbing floors, moving heavy furniture)",8.00],
+  ["Do yardwork (raking leaves, weeding, mowing)",4.50],
+  ["Have sexual relations",5.25],
+  ["Participate in moderate recreation (golf, bowling, dancing, doubles tennis)",6.00],
+  ["Participate in strenuous sports (swimming, singles tennis, basketball, skiing)",7.50]
+];
+const form=document.getElementById("dasi-form");
+const list=document.getElementById("questions");
+const results=document.getElementById("results");
+const error=document.getElementById("error");
+let last=null;
+activities.forEach(function(item,i){
+  const li=document.createElement("li");li.className="question";
+  const set=document.createElement("fieldset");
+  const legend=document.createElement("legend");
+  const n=document.createElement("span");n.className="number";n.textContent="QUESTION "+(i+1)+" · "+item[1].toFixed(2)+" points";
+  legend.append(n,document.createTextNode(item[0]));set.appendChild(legend);
+  const options=document.createElement("div");options.className="options";
+  [["1","Yes"],["0","No"]].forEach(function(pair){
+    const label=document.createElement("label");
+    const radio=document.createElement("input");radio.type="radio";radio.name="v"+(i+1);radio.value=pair[0];radio.required=true;
+    label.append(radio,document.createTextNode(pair[1]));options.appendChild(label);
+  });
+  set.appendChild(options);li.appendChild(set);list.appendChild(li);
+});
+function selected(){return activities.map(function(_,i){
+  const chosen=form.querySelector('input[name="v'+(i+1)+'"]:checked');
+  return chosen ? Number(chosen.value) : null;
+});}
+form.addEventListener("change",function(){
+  const count=selected().filter(x=>x!==null).length;
+  document.getElementById("progress").textContent=count+" of 12 answered";
+  error.hidden=true;results.hidden=true;last=null;
+});
+form.addEventListener("reset",function(){
+  last=null;results.hidden=true;error.hidden=true;
+  document.getElementById("progress").textContent="0 of 12 answered";
+});
+form.addEventListener("submit",function(event){
+  event.preventDefault();
+  const answers=selected();
+  if(answers.some(x=>x===null)){
+    error.textContent="Please answer all 12 activity questions before calculating.";
+    error.hidden=false;results.hidden=true;
+    const first=answers.indexOf(null);
+    form.querySelector('input[name="v'+(first+1)+'"]').focus();
+    return;
+  }
+  error.hidden=true;
+  const score=Number(activities.reduce((sum,item,i)=>sum+item[1]*answers[i],0).toFixed(2));
+  const vo2=Number((0.43*score+9.6).toFixed(2));
+  const mets=Number((vo2/3.5).toFixed(2));
+  last={score:score,vo2:vo2,mets:mets,answers:answers};
+  document.getElementById("score").textContent=score.toFixed(2);
+  document.getElementById("vo2").textContent=vo2.toFixed(2);
+  document.getElementById("mets").textContent=mets.toFixed(2);
+  document.getElementById("interpretation").textContent=score<=34
+    ?"DASI ≤34: limited or uncertain functional capacity by this screening threshold. Additional evaluation depends on the full clinical assessment."
+    :"DASI >34: higher self-reported functional capacity. This does not independently establish surgical clearance.";
+  results.hidden=false;results.scrollIntoView({behavior:"smooth",block:"nearest"});
+});
+document.getElementById("download").addEventListener("click",function(){
+  if(!last)return;
+  const row=last.answers.concat([last.score,last.vo2,last.mets]);
+  const csv=activities.map((_,i)=>"v"+(i+1)).concat(["dasi_score","peak_vo2_ml_kg_min","estimated_mets"]).join(",")+"\n"+row.join(",")+"\n";
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+  const url=URL.createObjectURL(blob);const a=document.createElement("a");
+  a.href=url;a.download="dasi-results.csv";document.body.appendChild(a);a.click();a.remove();
+  setTimeout(function(){URL.revokeObjectURL(url);},1000);
+});
+</script>
 </body>
 </html>

@@ -10,8 +10,8 @@ def test_dasi_index_single():
     assert "peak_vo2_ml_kg_min" in res
     assert "mets" in res
     assert res["dasi_score"] > 0
-    # v1(1.75) + v2(1.75) + v3(2.75) = 6.25
-    assert res["dasi_score"] == 6.25
+    # v1(2.75) + v2(1.75) + v3(2.75) = 7.25
+    assert res["dasi_score"] == 7.25
 
 
 def test_dasi_score_calculation():
@@ -81,3 +81,55 @@ def test_precomputed_dasi_score():
     assert res["dasi_score"] == 41.7
     assert res["peak_vo2_ml_kg_min"] == round((41.7 * 0.43) + 9.6, 2)
     assert res["mets"] == round(res["peak_vo2_ml_kg_min"] / 3.5, 2)
+
+def test_published_weights_and_threshold():
+    from dasi_index import DASI_ITEMS, classify_functional_capacity
+    assert [v["weight"] for v in DASI_ITEMS.values()] == [
+        2.75, 1.75, 2.75, 5.50, 8.00, 2.70, 3.50, 8.00,
+        4.50, 5.25, 6.00, 7.50
+    ]
+    assert MAX_DASI_SCORE == 58.2
+    assert "limited" in classify_functional_capacity(34, 6.9)["classification"]
+    assert "higher" in classify_functional_capacity(34.01, 6.9)["classification"]
+
+
+@pytest.mark.parametrize("response", [None, "no", "NaN", float("inf"), -1, 0.5, 2])
+def test_nonbinary_response_rejected(response):
+    with pytest.raises(ValueError):
+        calculate_dasi_score({"v1": response})
+
+
+@pytest.mark.parametrize("score", ["not-a-number", "nan", float("inf"), -1, 58.21])
+def test_invalid_score_rejected(score):
+    with pytest.raises(ValueError):
+        calculate_metrics(dasi_score=score)
+
+
+def test_mixed_input_rejected():
+    with pytest.raises(ValueError):
+        calculate_metrics(dasi_score=10, v1=1)
+
+
+def test_batch_with_preexisting_score_column(tmp_path):
+    source = tmp_path / "source.csv"
+    output = tmp_path / "result.csv"
+    source.write_text("sample,dasi_score\nX,58.2\n", encoding="utf-8")
+    process_batch(str(source), str(output))
+    assert output.read_text(encoding="utf-8").splitlines()[0].count("dasi_score") == 1
+
+
+def test_empty_dasi_assessment_is_rejected():
+    with pytest.raises(ValueError):
+        calculate_metrics()
+
+
+def test_batch_neutralizes_spreadsheet_formulas(tmp_path):
+    csv_in = tmp_path / "in.csv"
+    csv_out = tmp_path / "out.csv"
+    csv_in.write_text('case,v1\n"=1+1",1\n', encoding="utf-8")
+    process_batch(str(csv_in), str(csv_out))
+    import csv
+    with csv_out.open(newline="", encoding="utf-8") as handle:
+        row = next(csv.DictReader(handle))
+    assert row["case"] == "'=1+1"
+    assert row["dasi_score"] == "2.75"

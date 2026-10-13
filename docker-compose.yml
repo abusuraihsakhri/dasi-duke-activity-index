@@ -9,6 +9,7 @@ services:
     environment:
       - AUDIT_SECRET_KEY=${AUDIT_SECRET_KEY:?AUDIT_SECRET_KEY must be set in .env file}
       - MODEL_PROVIDER=mock
+      - AUDIT_API_KEY=${AUDIT_API_KEY:-}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]

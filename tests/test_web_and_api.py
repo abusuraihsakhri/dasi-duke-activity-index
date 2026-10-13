@@ -53,3 +53,16 @@ def test_api_root_serves_static_questionnaire():
     response = index()
     assert Path(response.path).is_file()
     assert str(response.path).endswith("web/index.html")
+
+
+def test_legacy_audit_api_requires_secret(monkeypatch):
+    from agents.api import require_audit_api_key
+    monkeypatch.delenv("AUDIT_API_KEY", raising=False)
+    with pytest.raises(HTTPException) as error:
+        require_audit_api_key(None)
+    assert error.value.status_code == 503
+    monkeypatch.setenv("AUDIT_API_KEY", "test-authorization-token")
+    with pytest.raises(HTTPException) as error:
+        require_audit_api_key("wrong-token")
+    assert error.value.status_code == 401
+    assert require_audit_api_key("test-authorization-token") is None

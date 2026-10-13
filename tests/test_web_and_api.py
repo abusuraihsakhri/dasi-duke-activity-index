@@ -66,3 +66,19 @@ def test_legacy_audit_api_requires_secret(monkeypatch):
         require_audit_api_key("wrong-token")
     assert error.value.status_code == 401
     assert require_audit_api_key("test-authorization-token") is None
+
+
+def test_browser_javascript_has_valid_syntax():
+    import shutil
+    import subprocess
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("Node.js not installed")
+    page = HTML.read_text(encoding="utf-8")
+    script = re.search(r"<script>([\s\S]*?)</script>", page)
+    assert script, "Browser application script not found"
+    checked = subprocess.run(
+        [node, "--check", "-"], input=script.group(1), text=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
+    )
+    assert checked.returncode == 0, checked.stderr

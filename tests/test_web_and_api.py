@@ -52,4 +52,4 @@ def test_api_rejects_incomplete_and_fractional():
 def test_api_root_serves_static_questionnaire():
     response = index()
     assert Path(response.path).is_file()
-    assert response.path.endswith("web/index.html")
+    assert str(response.path).endswith("web/index.html")

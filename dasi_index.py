@@ -134,6 +134,8 @@ def calculate_metrics(**kwargs) -> Dict[str, Any]:
             raise ValueError("dasi_score must be between 0 and 58.2")
         dasi_score = round(dasi_score, 2)
     else:
+        if not supplied:
+            raise ValueError("Provide at least one DASI response or a precomputed dasi_score")
         dasi_score = calculate_dasi_score(supplied)
 
     peak_vo2 = estimate_peak_vo2(dasi_score)
@@ -181,7 +183,11 @@ def process_batch(input_csv: str, output_csv: str) -> None:
 
     for r in rows:
         calc_res = calculate_metrics(**r)
-        row_dict = dict(r)
+        # Prevent spreadsheet formula execution when exported CSV is opened.
+        row_dict = {
+            k: ("'" + v if isinstance(v, str) and v.lstrip().startswith(("=", "+", "-", "@")) else v)
+            for k, v in r.items()
+        }
         row_dict["dasi_score"] = calc_res["dasi_score"]
         row_dict["peak_vo2_ml_kg_min"] = calc_res["peak_vo2_ml_kg_min"]
         row_dict["mets"] = calc_res["mets"]

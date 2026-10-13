@@ -22,21 +22,21 @@ from typing import Dict, Any, List, Optional
 
 # DASI questionnaire items with metabolic weights (Hlatky et al. 1989)
 DASI_ITEMS = {
-    "v1":  {"weight": 1.75, "description": "Take care of yourself (eating, dressing, bathing)"},
+    "v1":  {"weight": 2.75, "description": "Take care of yourself (eating, dressing, bathing)"},
     "v2":  {"weight": 1.75, "description": "Walk indoors around the house"},
     "v3":  {"weight": 2.75, "description": "Walk 1-2 blocks on level ground"},
-    "v4":  {"weight": 3.50, "description": "Climb a flight of stairs or walk up a hill"},
-    "v5":  {"weight": 4.50, "description": "Run a short distance"},
+    "v4":  {"weight": 5.50, "description": "Climb a flight of stairs or walk up a hill"},
+    "v5":  {"weight": 8.00, "description": "Run a short distance"},
     "v6":  {"weight": 2.70, "description": "Light work around the house (dusting, washing dishes)"},
     "v7":  {"weight": 3.50, "description": "Moderate work around the house (vacuuming, sweeping)"},
-    "v8":  {"weight": 5.50, "description": "Heavy work around the house (scrubbing floors, lifting)"},
-    "v9":  {"weight": 4.00, "description": "Rake leaves, weed, or garden"},
+    "v8":  {"weight": 8.00, "description": "Heavy work around the house (scrubbing floors, lifting)"},
+    "v9":  {"weight": 4.50, "description": "Rake leaves, weed, or garden"},
     "v10": {"weight": 5.25, "description": "Sexual relations"},
     "v11": {"weight": 6.00, "description": "Moderate recreational activities (golf, bowling)"},
     "v12": {"weight": 7.50, "description": "Strenuous sports (swimming, tennis, basketball)"},
 }
 
-MAX_DASI_SCORE = 48.7  # Sum of all weights (1.75+1.75+2.75+3.50+4.50+2.70+3.50+5.50+4.00+5.25+6.00+7.50)
+MAX_DASI_SCORE = sum(item["weight"] for item in DASI_ITEMS.values())  # 58.2
 
 
 def calculate_dasi_score(responses: Dict[str, float]) -> float:

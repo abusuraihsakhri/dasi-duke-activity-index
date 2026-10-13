@@ -116,3 +116,20 @@ def test_batch_with_preexisting_score_column(tmp_path):
     source.write_text("sample,dasi_score\nX,58.2\n", encoding="utf-8")
     process_batch(str(source), str(output))
     assert output.read_text(encoding="utf-8").splitlines()[0].count("dasi_score") == 1
+
+
+def test_empty_dasi_assessment_is_rejected():
+    with pytest.raises(ValueError):
+        calculate_metrics()
+
+
+def test_batch_neutralizes_spreadsheet_formulas(tmp_path):
+    csv_in = tmp_path / "in.csv"
+    csv_out = tmp_path / "out.csv"
+    csv_in.write_text('case,v1\n"=1+1",1\n', encoding="utf-8")
+    process_batch(str(csv_in), str(csv_out))
+    import csv
+    with csv_out.open(newline="", encoding="utf-8") as handle:
+        row = next(csv.DictReader(handle))
+    assert row["case"] == "'=1+1"
+    assert row["dasi_score"] == "2.75"
